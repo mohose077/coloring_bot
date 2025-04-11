@@ -46,9 +46,7 @@ async def handle_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ОБРОБКА ТЕМИ
 async def handle_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Якщо тема вже є — ігноруємо
-    if "topic" in context.user_data:
-        return
+   
 
     topic = update.message.text
     context.user_data["topic"] = topic
