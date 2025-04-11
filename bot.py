@@ -58,6 +58,8 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^(Дісней|Тварини|Машинки|Динозаври|Казкові|Їжа)$"), handle_topic))
     pp.add_handler(MessageHandler(filters.Regex("^(1|3|5|10)$"), handle_amount))
     app.run_polling()
+    app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
+
 
 if __name__ == "__main__":
     main()
@@ -71,3 +73,24 @@ async def handle_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ Кількість зображень: {amount}\n⬇️ Обери формат листа:",
         reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
     )
+
+async def handle_format(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    page_format = update.message.text
+    context.user_data["format"] = page_format
+
+    # Отримаємо всі зібрані дані
+    age = context.user_data.get("age")
+    topic = context.user_data.get("topic")
+    amount = context.user_data.get("amount")
+
+    await update.message.reply_text(
+        f"✅ Формат: {page_format}\n\n"
+        f"📦 Твоє замовлення:\n"
+        f"👶 Вік: {age}\n"
+        f"🎨 Тема: {topic}\n"
+        f"🖼 Кількість: {amount}\n"
+        f"📄 Формат: {page_format}\n\n"
+        f"🔧 Починаю підготовку розмальовок..."
+    )
+
+    # Тут у майбутньому буде генерація та відправка зображень
