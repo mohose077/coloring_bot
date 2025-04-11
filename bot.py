@@ -56,8 +56,18 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Regex("^(2-3 роки|4 роки|5 років|6 років)$"), handle_age))
     app.add_handler(MessageHandler(filters.Regex("^(Дісней|Тварини|Машинки|Динозаври|Казкові|Їжа)$"), handle_topic))
-
+    pp.add_handler(MessageHandler(filters.Regex("^(1|3|5|10)$"), handle_amount))
     app.run_polling()
 
 if __name__ == "__main__":
     main()
+
+async def handle_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    amount = update.message.text
+    context.user_data["amount"] = amount
+
+    keyboard = [["A4", "A5"]]
+    await update.message.reply_text(
+        f"✅ Кількість зображень: {amount}\n⬇️ Обери формат листа:",
+        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
+    )
