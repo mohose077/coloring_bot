@@ -124,12 +124,7 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
     app.add_handler(CallbackQueryHandler(handle_rating))
     app.run_polling()
-    
-
 
 if __name__ == "__main__":
+    
     main()
-
-
-
-    # Тут у майбутньому буде генерація та відправка зображень
