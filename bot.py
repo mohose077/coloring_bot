@@ -1,6 +1,5 @@
 # bot.py
-import os
-import asyncio
+
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters)
 from config import TELEGRAM_BOT_TOKEN
@@ -66,8 +65,9 @@ async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     action, image_url = query.data.split("|")
     await query.edit_message_caption(caption=f"{query.message.caption}\n\n✅ Ви оцінили: {'👍' if action == 'like' else '👎'}")
 
+import asyncio
 
-def main():
+async def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -77,20 +77,23 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
     app.add_handler(CallbackQueryHandler(handle_rating))
 
-    import asyncio
-    asyncio.run(app.bot.delete_webhook(drop_pending_updates=True))
+    await app.bot.delete_webhook(drop_pending_updates=True)
 
     PORT = int(os.environ.get("PORT", 8443))
     BASE_URL = os.environ.get("RENDER_EXTERNAL_URL")
 
-    app.run_webhook(
+    await app.initialize()
+    await app.start()
+    await app.updater.start_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path="webhook",
         webhook_url=f"{BASE_URL}/webhook"
     )
 
+    await app.updater.wait_for_stop()
+
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
