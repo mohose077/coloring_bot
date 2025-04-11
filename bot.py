@@ -1,3 +1,6 @@
+from flask import Flask
+import threading
+
 import os
 import asyncio
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
@@ -68,6 +71,16 @@ async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     action, image_url = query.data.split("|")
     await query.edit_message_caption(caption=f"{query.message.caption}\n\n✅ Ви оцінили: {'👍' if action == 'like' else '👎'}")
 
+# Flask-приманка для Render
+app_flask = Flask(__name__)
+
+@app_flask.route('/')
+def index():
+    return 'Bot is alive!'
+
+def run_flask():
+    app_flask.run(host='0.0.0.0', port=8080)
+
 import asyncio
 
 async def main():
@@ -97,5 +110,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    threading.Thread(target=run_flask).start()
     asyncio.run(main())
-
