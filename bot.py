@@ -88,14 +88,22 @@ async def handle_format(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
         ])
 
-        await context.bot.send_photo(
-            chat_id=user_id,
-            photo=image_url,
-            caption=f"🖼 Розмальовка {i+1} із {amount}",
-            reply_markup=keyboard
-        )
+        try:
+            await context.bot.send_photo(
+                chat_id=user_id,
+                photo=image_url,
+                caption=f"🖼 Розмальовка {i+1} із {amount}",
+                reply_markup=keyboard
+            )
+        except Exception as e:
+            print(f"[ПОМИЛКА при надсиланні фото]: {e}")
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ Не вдалося надіслати розмальовку. Спробуйте ще раз пізніше або виберіть меншу кількість."
+            )
 
     await update.message.reply_text("✅ Усі розмальовки надіслані! Дякуємо за оцінки 🙏")
+
 async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
