@@ -8,7 +8,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Привіт! Обери вік дитини:",
         reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
     )
-
 def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
