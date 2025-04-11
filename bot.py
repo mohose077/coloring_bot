@@ -124,8 +124,11 @@ async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # MAIN
+import os
+from telegram.ext import Application
+
 async def main():
-    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+    app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Regex("^(2-3 роки|4 роки|5 років|6 років)$"), handle_age))
@@ -141,12 +144,17 @@ async def main():
     PATH = "webhook"
     BASE_URL = os.environ.get("RENDER_EXTERNAL_URL")
 
-    await app.run_webhook(
+    await app.initialize()
+    await app.start()
+    await app.updater.start_webhook(
         listen=HOST,
         port=PORT,
         url_path=PATH,
         webhook_url=f"{BASE_URL}/{PATH}"
     )
 
+    await app.updater.wait_for_stop()
+
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
