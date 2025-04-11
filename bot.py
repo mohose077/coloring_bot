@@ -1,5 +1,7 @@
-import asyncio
 import os
+import asyncio
+
+
 from telegram import (
     Update, 
     ReplyKeyboardMarkup, 
@@ -122,11 +124,7 @@ async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # MAIN
-import os
-
-import asyncio
-
-async def main():
+def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -136,21 +134,21 @@ async def main():
     app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
     app.add_handler(CallbackQueryHandler(handle_rating))
 
-    await app.bot.delete_webhook(drop_pending_updates=True)
+    # Видаляємо старий webhook — ОК запускати як окремий asyncio.run
+    import asyncio
+    asyncio.run(app.bot.delete_webhook(drop_pending_updates=True))
 
     PORT = int(os.environ.get("PORT", 8443))
     HOST = "0.0.0.0"
     PATH = "webhook"
     BASE_URL = os.environ.get("RENDER_EXTERNAL_URL")
 
-    await app.run_webhook(
+    app.run_webhook(
         listen=HOST,
         port=PORT,
         url_path=PATH,
         webhook_url=f"{BASE_URL}/{PATH}"
     )
 
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
