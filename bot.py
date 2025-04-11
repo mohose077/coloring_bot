@@ -67,7 +67,7 @@ async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_caption(caption=f"{query.message.caption}\n\n✅ Ви оцінили: {'👍' if action == 'like' else '👎'}")
 
 
-async def main():
+def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -77,11 +77,13 @@ async def main():
     app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
     app.add_handler(CallbackQueryHandler(handle_rating))
 
-    await app.bot.delete_webhook(drop_pending_updates=True)
+    import asyncio
+    asyncio.run(app.bot.delete_webhook(drop_pending_updates=True))
 
     PORT = int(os.environ.get("PORT", 8443))
     BASE_URL = os.environ.get("RENDER_EXTERNAL_URL")
-    await app.run_webhook(
+
+    app.run_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path="webhook",
@@ -90,4 +92,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
+
