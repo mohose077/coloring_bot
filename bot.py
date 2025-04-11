@@ -79,7 +79,8 @@ def index():
     return 'Bot is alive!'
 
 def run_flask():
-    app_flask.run(host='0.0.0.0', port=8080)
+    app_flask.run(host='0.0.0.0', port=8888)
+
 
 import asyncio
 
