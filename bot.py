@@ -37,9 +37,12 @@ async def handle_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     topic = update.message.text
     context.user_data["topic"] = topic
 
+    keyboard = [["1", "3", "5"], ["10"]]
     await update.message.reply_text(
-        f"✅ Тематика обрана: {topic}\n🔜 Наступний крок — обрати кількість зображень (це зробимо далі)"
+        f"✅ Тематика обрана: {topic}\n⬇️ Обери, скільки розмальовок хочеш отримати:",
+        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
     )
+
 
 # MAIN
 def main():
