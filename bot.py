@@ -1,8 +1,20 @@
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import (
+    Update, 
+    ReplyKeyboardMarkup, 
+    InlineKeyboardMarkup, 
+    InlineKeyboardButton
+)
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+    ApplicationBuilder, 
+    CommandHandler, 
+    MessageHandler, 
+    CallbackQueryHandler, 
+    ContextTypes, 
+    filters
 )
 from config import TELEGRAM_BOT_TOKEN
+from generator import generate_coloring_image
+
 
 # START
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -60,19 +72,44 @@ async def handle_format(update: Update, context: ContextTypes.DEFAULT_TYPE):
     page_format = update.message.text
     context.user_data["format"] = page_format
 
-    # Отримаємо всі зібрані дані
     age = context.user_data.get("age")
     topic = context.user_data.get("topic")
-    amount = context.user_data.get("amount")
+    amount = int(context.user_data.get("amount"))
+    user_id = update.effective_chat.id
 
-    await update.message.reply_text(
-        f"✅ Формат: {page_format}\n\n"
-        f"📦 Твоє замовлення:\n"
-        f"👶 Вік: {age}\n"
-        f"🎨 Тема: {topic}\n"
-        f"🖼 Кількість: {amount}\n"
-        f"📄 Формат: {page_format}\n\n"
-        f"🔧 Починаю підготовку розмальовок..."
+    await update.message.reply_text("🔧 Генерую розмальовки, будь ласка зачекай...")
+
+    for i in range(amount):
+        prompt = f"{topic} for children {age}"
+        image_url = generate_coloring_image(prompt)
+
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("👍 Подобається", callback_data=f"like|{image_url}"),
+                InlineKeyboardButton("👎 Не подобається", callback_data=f"dislike|{image_url}")
+            ]
+        ])
+
+        await context.bot.send_photo(
+            chat_id=user_id,
+            photo=image_url,
+            caption=f"🖼 Розмальовка {i+1} із {amount}",
+            reply_markup=keyboard
+        )
+
+    await update.message.reply_text("✅ Усі розмальовки надіслані! Дякуємо за оцінки 🙏")
+async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    action, image_url = query.data.split("|")
+    user = query.from_user
+
+    # Тут можна зберігати в базу або файл
+    print(f"[ОЦІНКА] Користувач {user.id} оцінив {image_url} як {action}")
+
+    await query.edit_message_caption(
+        caption=f"{query.message.caption}\n\n✅ Ви оцінили: {'👍' if action == 'like' else '👎'}"
     )
 
 
@@ -85,6 +122,7 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^(Дісней|Тварини|Машинки|Динозаври|Казкові|Їжа)$"), handle_topic))
     app.add_handler(MessageHandler(filters.Regex("^(1|3|5|10)$"), handle_amount))
     app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
+    app.add_handler(CallbackQueryHandler(handle_rating))
     app.run_polling()
     
 
