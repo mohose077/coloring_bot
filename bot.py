@@ -94,7 +94,6 @@ async def main():
         webhook_url=f"{BASE_URL}/webhook"
     )
 
-    await app.updater.wait_for_stop()
 
 
 if __name__ == "__main__":
