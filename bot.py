@@ -120,6 +120,8 @@ async def handle_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # MAIN
+import os
+
 def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
@@ -129,7 +131,24 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^(1|3|5|10)$"), handle_amount))
     app.add_handler(MessageHandler(filters.Regex("^(A4|A5)$"), handle_format))
     app.add_handler(CallbackQueryHandler(handle_rating))
-    app.run_polling()
+
+    # Видаляємо старий webhook (якщо був)
+    import asyncio
+    asyncio.run(app.bot.delete_webhook(drop_pending_updates=True))
+
+    # Параметри для Render
+    PORT = int(os.environ.get("PORT", 8443))
+    HOST = "0.0.0.0"
+    PATH = "webhook"
+    BASE_URL = os.environ.get("RENDER_EXTERNAL_URL")
+
+    app.run_webhook(
+        listen=HOST,
+        port=PORT,
+        url_path=PATH,
+        webhook_url=f"{BASE_URL}/{PATH}"
+    )
+
 
 if __name__ == "__main__":
     
